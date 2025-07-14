@@ -3,7 +3,7 @@ package virtualpets.models;
 
 public enum PetType {
     MOLE("Talp", "mole.svg"),
-    MAGPIE("Garsa", "heron.svg"),
+    MAGPIE("Garsa", "magpie.svg"),
     TOAD("Gripau", "toad.svg");
 
     private final String displayName;

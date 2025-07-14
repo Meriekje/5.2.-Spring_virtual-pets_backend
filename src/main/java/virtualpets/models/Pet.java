@@ -51,15 +51,17 @@ public class Pet {
     @Max(value = 100, message = "Hunger must be between 0 and 100")
     private Integer hungerLevel = 50;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-
-
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     public void feed() {
         this.hungerLevel = Math.max(0, this.hungerLevel - 20);

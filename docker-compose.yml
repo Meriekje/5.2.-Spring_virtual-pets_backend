@@ -1,48 +1,71 @@
 version: '3.8'
 
 services:
+  # Base de dades MySQL
   mysql:
     image: mysql:8.0
-    container_name: virtual-pets-mysql
+    container_name: pet-game-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: virtual_pets_db
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: petgame
+      MYSQL_USER: petuser
+      MYSQL_PASSWORD: petpass123
     ports:
-      - "3306:3309"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - virtual-pets-network
+      - pet-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
 
-  backend:
-    build: ./src/main/java/backend
-    container_name: virtual-pets-backend
-    ports:
-      - "8080:8080"
+  # Aplicació Spring Boot
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: pet-game-app
     depends_on:
       - mysql
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/virtual_pets_db
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: password
-    networks:
-      - virtual-pets-network
-
-  frontend:
-    build: ./src/main/java//frontend
-    container_name: virtual-pets-frontend
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/petgame?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: petuser
+      SPRING_DATASOURCE_PASSWORD: petpass123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQL8Dialect
     ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-    environment:
-      REACT_APP_API_URL: http://localhost:8080/api
+      - "8080:8080"
     networks:
-      - virtual-pets-network
+      - pet-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: phpMyAdmin per gestionar la BD
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: pet-game-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: petuser
+      PMA_PASSWORD: petpass123
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - pet-network
+    restart: unless-stopped
 
 volumes:
   mysql_data:
 
 networks:
-  virtual-pets-network:
+  pet-network:
     driver: bridge

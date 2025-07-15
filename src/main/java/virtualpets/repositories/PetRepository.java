@@ -22,12 +22,7 @@ public interface PetRepository extends JpaRepository<Pet, Long> {
     @Query("SELECT p FROM Pet p WHERE p.owner.id = :ownerId AND p.id = :petId")
     Optional<Pet> findByIdAndOwnerId(@Param("petId") Long petId, @Param("ownerId") Long ownerId);
 
-    @Query("SELECT p FROM Pet p WHERE p.lastInteraction < :cutoffTime")
-    List<Pet> findPetsNeedingAttention(@Param("cutoffTime") LocalDateTime cutoffTime);
-
     @Query("SELECT COUNT(p) FROM Pet p WHERE p.owner.id = :ownerId")
     long countByOwnerId(@Param("ownerId") Long ownerId);
 
-    @Query("SELECT p FROM Pet p WHERE p.happinessLevel < :threshold")
-    List<Pet> findUnhappyPets(@Param("threshold") Integer threshold);
-}
+    }

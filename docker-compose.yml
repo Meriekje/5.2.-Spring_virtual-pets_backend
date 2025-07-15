@@ -6,10 +6,10 @@ services:
     image: mysql:8.0
     container_name: pet-game-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass123
-      MYSQL_DATABASE: petgame
-      MYSQL_USER: petuser
-      MYSQL_PASSWORD: petpass123
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -28,10 +28,10 @@ services:
     depends_on:
       - mysql
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/petgame?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: petuser
-      SPRING_DATASOURCE_PASSWORD: petpass123
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_DATASOURCE_URL: ${G_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: true
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQL8Dialect
@@ -51,10 +51,10 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     container_name: pet-game-phpmyadmin
     environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: petuser
-      PMA_PASSWORD: petpass123
+      PMA_HOST: ${PMA_HOST:-mysql}
+      PMA_PORT: ${PMA_PORT:-3306}
+      PMA_USER: ${PMA_USER:-root}
+      PMA_PASSWORD: ${PMA_PASSWORD}
     ports:
       - "8081:80"
     depends_on:

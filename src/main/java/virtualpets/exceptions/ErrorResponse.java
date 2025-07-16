@@ -26,5 +26,6 @@ public class ErrorResponse {
     this.status = status;
     this.timestamp = timestamp;
     this.path = path;
+    this.fieldErrors = null;
   }
 }

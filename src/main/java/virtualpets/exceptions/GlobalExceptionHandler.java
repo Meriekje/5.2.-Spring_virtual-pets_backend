@@ -41,7 +41,6 @@ public class GlobalExceptionHandler {
                         (existing, replacement) -> existing
                 ));
 
-
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message("Validation failed")
@@ -66,6 +65,7 @@ public class GlobalExceptionHandler {
                 .status(status.value())
                 .timestamp(LocalDateTime.now())
                 .path(request.getRequestURI())
+                .fieldErrors(null) // Explícitament null per excepcions sense validació
                 .build();
 
         return new ResponseEntity<>(error, status);

@@ -27,6 +27,8 @@ public class PetController {
 
     private final PetService petService;
     private final UserService userService;
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+    private static final String PET_NOT_FOUND = "Pet not found";
 
     public PetController(PetService petService, UserService userService) {
         this.petService = petService;
@@ -47,11 +49,11 @@ public class PetController {
     public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
         User currentUser = getCurrentUser();
         Pet pet = petService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
         // Check if user owns the pet or is admin
         if (!pet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals("ROLE_ADMIN")) {
+                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
             throw new UnauthorizedException("You don't have permission to access this pet");
         }
 
@@ -76,11 +78,11 @@ public class PetController {
         User currentUser = getCurrentUser();
 
         Pet existingPet = petService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
         // Check if user owns the pet or is admin
         if (!existingPet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals("ROLE_ADMIN")) {
+                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
             throw new UnauthorizedException("You don't have permission to update this pet");
         }
 
@@ -97,11 +99,11 @@ public class PetController {
         User currentUser = getCurrentUser();
 
         Pet existingPet = petService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
         // Check if user owns the pet or is admin
         if (!existingPet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals("ROLE_ADMIN")) {
+                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
             throw new UnauthorizedException("You don't have permission to delete this pet");
         }
 
@@ -136,11 +138,11 @@ public class PetController {
 
     private Pet getPetWithPermissionCheck(Long petId, User currentUser) {
         Pet pet = petService.findById(petId)
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
         // Check if user owns the pet or is admin
         if (!pet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals("ROLE_ADMIN")) {
+                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
             throw new UnauthorizedException("You don't have permission to interact with this pet");
         }
 

@@ -16,10 +16,11 @@ public class ErrorResponse {
   private LocalDateTime timestamp;
   private String path;
 
-  public ErrorResponse(String error, String message, int status) {
+  public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
+    this.timestamp = timestamp;
+    this.status = status;
     this.error = error;
     this.message = message;
-    this.status = status;
-    this.timestamp = LocalDateTime.now();
+    this.path = path;
   }
 }

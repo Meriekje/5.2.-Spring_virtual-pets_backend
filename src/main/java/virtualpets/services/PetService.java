@@ -25,16 +25,7 @@ public class PetService {
         User owner = userService.findById(ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
         pet.setOwner(owner);
-
         return petRepository.save(pet);
-    }
-
-    public Optional<Pet> findById(Long id) {
-        return petRepository.findById(id);
-    }
-
-    public List<Pet> findByOwnerId(Long ownerId) {
-        return petRepository.findByOwnerId(ownerId);
     }
 
     public Pet updatePet(Pet pet, Long ownerId) {
@@ -55,5 +46,22 @@ public class PetService {
         Pet existingPet = petRepository.findByIdAndOwnerId(petId, ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("Pet not found or not owned by user"));
         petRepository.delete(existingPet);
+    }
+
+   public Pet updatePetDirect(Pet pet) {
+        return petRepository.save(pet);
+    }
+
+    public void deletePetDirect(Pet pet) {
+        petRepository.delete(pet);
+    }
+
+
+    public Optional<Pet> findById(Long id) {
+        return petRepository.findById(id);
+    }
+
+    public List<Pet> findByOwnerId(Long ownerId) {
+        return petRepository.findByOwnerId(ownerId);
     }
 }

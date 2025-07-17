@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment files ###
+.env
+
+### Docker override files ###
+docker-compose.override.yml
+docker-compose.override.yaml
+
+### Logs, temp files, swap files ###
+*.log
+*.tmp
+*.swp
+
+### OS generated files ###
+.DS_Store
+Thumbs.db

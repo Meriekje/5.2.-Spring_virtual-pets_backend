@@ -27,7 +27,7 @@ public class PetController {
 
     private final PetService petService;
     private final UserService userService;
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     private static final String PET_NOT_FOUND = "Pet not found";
 
     public PetController(PetService petService, UserService userService) {
@@ -47,16 +47,9 @@ public class PetController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
-        User currentUser = getCurrentUser();
+        // AuthorizationFilter ja ha validat els permisos
         Pet pet = petService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
-
-        // Check if user owns the pet or is admin
-        if (!pet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
-            throw new UnauthorizedException("You don't have permission to access this pet");
-        }
-
         return ResponseEntity.ok(convertToDTO(pet));
     }
 
@@ -75,39 +68,26 @@ public class PetController {
 
     @PutMapping("/{id}")
     public ResponseEntity<PetDTO> updatePet(@PathVariable Long id, @Valid @RequestBody PetCreateDTO petUpdateDTO) {
-        User currentUser = getCurrentUser();
 
         Pet existingPet = petService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
-        // Check if user owns the pet or is admin
-        if (!existingPet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
-            throw new UnauthorizedException("You don't have permission to update this pet");
-        }
 
         existingPet.setName(petUpdateDTO.getName());
         existingPet.setType(petUpdateDTO.getType());
         existingPet.setColor(petUpdateDTO.getColor());
 
-        Pet updatedPet = petService.updatePet(existingPet, currentUser.getId());
+        Pet updatedPet = petService.updatePetDirect(existingPet);
         return ResponseEntity.ok(convertToDTO(updatedPet));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deletePet(@PathVariable Long id) {
-        User currentUser = getCurrentUser();
 
         Pet existingPet = petService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
-        // Check if user owns the pet or is admin
-        if (!existingPet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
-            throw new UnauthorizedException("You don't have permission to delete this pet");
-        }
-
-        petService.deletePet(id, currentUser.getId());
+        petService.deletePetDirect(existingPet);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Pet deleted successfully");
@@ -116,38 +96,37 @@ public class PetController {
 
     @PostMapping("/{id}/feed")
     public ResponseEntity<PetDTO> feedPet(@PathVariable Long id) {
-        User currentUser = getCurrentUser();
-        Pet pet = getPetWithPermissionCheck(id, currentUser);
+
+        Pet pet = petService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
         pet.feed();
-        Pet updatedPet = petService.updatePet(pet, currentUser.getId());
-
+        Pet updatedPet = petService.updatePetDirect(pet);
         return ResponseEntity.ok(convertToDTO(updatedPet));
     }
 
     @PostMapping("/{id}/play")
     public ResponseEntity<PetDTO> playWithPet(@PathVariable Long id) {
-        User currentUser = getCurrentUser();
-        Pet pet = getPetWithPermissionCheck(id, currentUser);
+
+        Pet pet = petService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
         pet.play();
-        Pet updatedPet = petService.updatePet(pet, currentUser.getId());
-
+        Pet updatedPet = petService.updatePetDirect(pet);
         return ResponseEntity.ok(convertToDTO(updatedPet));
     }
 
-    private Pet getPetWithPermissionCheck(Long petId, User currentUser) {
-        Pet pet = petService.findById(petId)
+    @PostMapping("/{id}/rest")
+    public ResponseEntity<PetDTO> restPet(@PathVariable Long id) {
+
+        Pet pet = petService.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(PET_NOT_FOUND));
 
-        // Check if user owns the pet or is admin
-        if (!pet.getOwner().getId().equals(currentUser.getId()) &&
-                !currentUser.getRole().name().equals(ROLE_ADMIN)) {
-            throw new UnauthorizedException("You don't have permission to interact with this pet");
-        }
-
-        return pet;
+        pet.rest();
+        Pet updatedPet = petService.updatePetDirect(pet);
+        return ResponseEntity.ok(convertToDTO(updatedPet));
     }
+
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

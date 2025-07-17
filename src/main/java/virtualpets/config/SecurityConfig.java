@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import virtualpets.security.JwtAuthenticationFilter;
+import virtualpets.security.AuthorizationFilter;
 
 import java.util.Arrays;
 
@@ -23,9 +24,12 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthorizationFilter authorizationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          AuthorizationFilter authorizationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authorizationFilter = authorizationFilter;
     }
 
     @Bean
@@ -40,7 +44,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(authorizationFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

@@ -48,7 +48,6 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null || !authentication.isAuthenticated()) {
             logger.warn("Unauthorized access attempt to {}", requestURI);
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -81,11 +80,23 @@ public class AuthorizationFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicEndpoint(String requestURI) {
-        return requestURI.startsWith("/api/auth/") ||
-                requestURI.startsWith("/h2-console/") ||
+        // temporary log for debugging
+        logger.debug("Checking if endpoint is public: {}", requestURI);
+
+        boolean isPublic = requestURI.startsWith("/api/auth/") ||
+                requestURI.startsWith("/swagger-ui/") ||
+                requestURI.startsWith("/swagger-ui.html") ||
+                requestURI.startsWith("/v3/api-docs") ||
+                requestURI.startsWith("/swagger-resources/") ||
+                requestURI.startsWith("/webjars/") ||
                 requestURI.startsWith("/actuator/") ||
                 requestURI.equals("/") ||
                 requestURI.startsWith("/static/");
+
+        // temporary log for debugging
+        logger.debug("Endpoint {} is public: {}", requestURI, isPublic);
+
+        return isPublic;
     }
 
     private boolean isAuthorized(String requestURI, String method, User user) {
